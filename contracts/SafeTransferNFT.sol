@@ -4,12 +4,10 @@ pragma solidity ^0.8.6;
 
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165CheckerUpgradeable.sol";
 import "./ISafeTransferNFT.sol";
 import "./Bytes.sol";
 
 contract SafeTransferNFT is ISafeTransferNFT, Initializable {
-    using ERC165CheckerUpgradeable for address;
     using Bytes for bytes;
 
     struct SafeTransferTokenData {
