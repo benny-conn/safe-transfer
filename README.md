@@ -3,7 +3,6 @@
 _Scripts and base/helper contracts brought to you by openzeppelin_
 _Contract interaction with the help of Alchemy_
 
-
 ## Deploy
 
 1. Pull repo locally and copy `.env.sample` into another file called `.env`. Fill out the fields in this file with your alchemy app url and test net public and private keys.
@@ -13,6 +12,8 @@ _Contract interaction with the help of Alchemy_
 ```bash
 npx hardhat run scripts/deploy.js --network ropsten
 ```
+
+4. Repeat steps 2 and 3 for each contract as needed.
 
 Done! The address of your deployed contract will be printed in the console on a successful deploy.
 
@@ -24,7 +25,7 @@ A payable function that will store the value of a payment in wei towards _to_ wi
 
 ### pullTransfer(address to)
 
-A function that will refund the caller with the amount that is currently enroute to a given _to_ address given that amount was sent by the caller. 
+A function that will refund the caller with the amount that is currently enroute to a given _to_ address given that amount was sent by the caller.
 
 ### completeTransfer(address from, uint256 secret)
 
@@ -36,16 +37,14 @@ Initiating a transfer of NFT requires a user to send their NFT to the address of
 
 ### pullTransfer(address to)
 
-A function that will return the NFT that is currently enroute to a given _to_ address given that the NFT was originally owned by the caller. 
+A function that will return the NFT that is currently enroute to a given _to_ address given that the NFT was originally owned by the caller.
 
 ### completeTransfer(address from, uint256 secret)
 
 A function that will complete a NFT transfer by sending the _from_'s NFT to the caller requiring the caller to know the address _from_ and an optional secret 256 bit number _secret_.
 
-
 ## Interacting
 
 Some example interactions with web3.js can be found [here](https://github.com/bennycio/safe-transfer-ui/blob/main/src/util/interact.js)
-
 
 _Enjoy safe transfers :)_
