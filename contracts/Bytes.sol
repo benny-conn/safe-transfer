@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.6;
+pragma solidity ^0.8.0;
 
 library Bytes {
     function toAddress(bytes memory bys) internal pure returns (address addr) {
@@ -19,5 +19,11 @@ library Bytes {
             }
         }
         return result;
+    }
+
+    function toBytes32(bytes memory b) internal pure returns (bytes32 ret) {
+        assembly {
+            ret := mload(add(b, 32))
+        }
     }
 }

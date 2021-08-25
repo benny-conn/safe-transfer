@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.6;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "./ISafeTransferNFT.sol";
@@ -24,7 +24,7 @@ contract SafeTransferNFT is ISafeTransferNFT {
             data.contractAddress != address(0),
             "SafeTransferNFT: No transfer in progress"
         );
-        IERC721Upgradeable(data.contractAddress).safeTransferFrom(
+        IERC721(data.contractAddress).safeTransferFrom(
             address(this),
             msg.sender,
             data.tokenID
@@ -49,7 +49,7 @@ contract SafeTransferNFT is ISafeTransferNFT {
             data.secret == keccak256(secret),
             "SafeTransferNFT: Invalid secret"
         );
-        IERC721Upgradeable(data.contractAddress).safeTransferFrom(
+        IERC721(data.contractAddress).safeTransferFrom(
             address(this),
             msg.sender,
             data.tokenID
@@ -83,7 +83,7 @@ contract SafeTransferNFT is ISafeTransferNFT {
             secretBS.length == 32,
             "SafeTransferNFT: Invalid secret length"
         );
-        bytes32 secret = bytes32(secretBS);
+        bytes32 secret = secretBS.toBytes32();
         SafeTransferTokenData memory trans = SafeTransferTokenData(
             msg.sender,
             tokenId,
