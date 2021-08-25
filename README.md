@@ -10,7 +10,7 @@ _Contract interaction with the help of Alchemy_
 3. Run the following script
 
 ```bash
-npx hardhat run scripts/deploy.js --network ropsten
+npm run deploy-dev
 ```
 
 4. Repeat steps 2 and 3 for each contract as needed.
