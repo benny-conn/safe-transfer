@@ -79,6 +79,10 @@ contract SafeTransferNFT is ISafeTransferNFT {
         );
         bytes memory addrBS = data[:20];
         bytes memory secretBS = data[20:];
+        require(
+            secretBS.length == 32,
+            "SafeTransferNFT: Invalid secret length"
+        );
         bytes32 secret = bytes32(secretBS);
         SafeTransferTokenData memory trans = SafeTransferTokenData(
             msg.sender,
