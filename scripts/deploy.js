@@ -1,13 +1,14 @@
-const { ethers, upgrades } = require("hardhat")
-
 async function main() {
-  const Contract = await ethers.getContractFactory("SafeTransfer")
-  console.log("Deploying Contract...")
-  const contract = await upgrades.deployProxy(Contract, [], {
-    initializer: "initialize",
-  })
-  await contract.deployed()
-  console.log("Contract deployed to:", contract.address)
+  const Contract = await ethers.getContractFactory("SafeTransferNFT")
+
+  // Start deployment, returning a promise that resolves to a contract object
+  const contract = await Contract.deploy() // Instance of the contract
+  console.log("Contract deployed to address:", contract.address)
 }
 
-main().catch(console.error)
+main()
+  .then(() => process.exit(0))
+  .catch(error => {
+    console.error(error)
+    process.exit(1)
+  })

@@ -2,19 +2,16 @@
 
 pragma solidity ^0.8.6;
 
-import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "./ISafeTransfer.sol";
 
-contract SafeTransfer is ISafeTransfer, Initializable {
-    using AddressUpgradeable for address payable;
+contract SafeTransfer is ISafeTransfer {
+    using Address for address payable;
 
     mapping(address => mapping(address => uint256)) private _safeTransfers;
-    mapping(address => mapping(address => uint256)) private _secrets;
+    mapping(address => mapping(address => bytes32)) private _secrets;
 
-    function initialize() public virtual initializer {}
-
-    function initiateTransfer(address _to, uint256 _secret)
+    function initiateTransfer(address _to, bytes32 _secret)
         external
         payable
         override
@@ -24,9 +21,7 @@ contract SafeTransfer is ISafeTransfer, Initializable {
             "SafeTransfer: Transfer already in progress"
         );
         _safeTransfers[msg.sender][_to] = msg.value;
-        if (_secret != 0) {
-            _secrets[msg.sender][_to] = _secret;
-        }
+        _secrets[msg.sender][_to] = _secret;
     }
 
     function pullTransfer(address _to) external override {
@@ -38,11 +33,11 @@ contract SafeTransfer is ISafeTransfer, Initializable {
         payable(msg.sender).sendValue(amount);
         _safeTransfers[msg.sender][_to] = 0;
         if (_secrets[msg.sender][_to] != 0) {
-            _secrets[msg.sender][_to] = uint256(0);
+            _secrets[msg.sender][_to] = bytes32(0);
         }
     }
 
-    function completeTransfer(address _from, uint256 _secret)
+    function completeTransfer(address _from, bytes memory _secret)
         external
         override
     {
@@ -50,14 +45,12 @@ contract SafeTransfer is ISafeTransfer, Initializable {
             _safeTransfers[_from][msg.sender] != 0,
             "SafeTransfer: No transfer in progress"
         );
-        uint256 secret = _secrets[_from][msg.sender];
-        if (secret != 0) {
-            require(_secret == secret, "SafeTransfer: Incorrect secret");
-            _secrets[_from][msg.sender] = uint256(0);
-        }
+        bytes32 secret = _secrets[_from][msg.sender];
+        require(secret == keccak256(_secret), "SafeTransfer: Incorrect secret");
         uint256 amount = _safeTransfers[_from][msg.sender];
         payable(msg.sender).sendValue(amount);
         _safeTransfers[_from][msg.sender] = 0;
+        _secrets[_from][msg.sender] = bytes32(0);
         emit SafeTransferComplete(_from, msg.sender, amount);
     }
 

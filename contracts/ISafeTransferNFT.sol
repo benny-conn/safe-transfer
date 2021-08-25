@@ -14,5 +14,5 @@ interface ISafeTransferNFT is IERC721ReceiverUpgradeable {
 
     function pullTransfer(address _to) external;
 
-    function completeTransfer(address _from, uint256 _secret) external;
+    function completeTransfer(address _from, bytes memory _secret) external;
 }

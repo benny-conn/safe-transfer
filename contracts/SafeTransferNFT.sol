@@ -2,30 +2,27 @@
 
 pragma solidity ^0.8.6;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "./ISafeTransferNFT.sol";
 import "./Bytes.sol";
 
-contract SafeTransferNFT is ISafeTransferNFT, Initializable {
+contract SafeTransferNFT is ISafeTransferNFT {
     using Bytes for bytes;
 
     struct SafeTransferTokenData {
         address contractAddress;
         uint256 tokenID;
-        uint256 secret;
+        bytes32 secret;
     }
 
     event LogEvent(
         address indexed to,
-        uint256 indexed secret,
+        bytes32 indexed secret,
         bytes indexed data
     );
 
     mapping(address => mapping(address => SafeTransferTokenData))
         private _safeTransfers;
-
-    function initialize() public virtual initializer {}
 
     function pullTransfer(address _to) external override {
         SafeTransferTokenData memory data = _safeTransfers[_to][msg.sender];
@@ -45,13 +42,19 @@ contract SafeTransferNFT is ISafeTransferNFT, Initializable {
         );
     }
 
-    function completeTransfer(address _from, uint256 secret) external override {
+    function completeTransfer(address _from, bytes memory secret)
+        external
+        override
+    {
         SafeTransferTokenData memory data = _safeTransfers[_from][msg.sender];
         require(
             data.contractAddress != address(0),
             "SafeTransferNFT: No transfer in progress"
         );
-        require(data.secret == secret, "SafeTransferNFT: Invalid secret");
+        require(
+            data.secret == keccak256(secret),
+            "SafeTransferNFT: Invalid secret"
+        );
         IERC721Upgradeable(data.contractAddress).safeTransferFrom(
             address(this),
             msg.sender,
@@ -82,15 +85,15 @@ contract SafeTransferNFT is ISafeTransferNFT, Initializable {
         );
         bytes memory addrBS = data[:20];
         bytes memory secretBS = data[20:];
-        uint256 asUint256 = secretBS.toUint256();
+        bytes32 secret = bytes32(secretBS);
         SafeTransferTokenData memory trans = SafeTransferTokenData(
             msg.sender,
             tokenId,
-            asUint256
+            secret
         );
         address asAddr = addrBS.toAddress();
         _safeTransfers[from][asAddr] = trans;
-        emit LogEvent(asAddr, asUint256, data);
+        emit LogEvent(asAddr, secret, data);
         return this.onERC721Received.selector;
     }
 }
