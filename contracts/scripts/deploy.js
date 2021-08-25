@@ -1,5 +1,5 @@
 async function main() {
-  const Contract = await ethers.getContractFactory("SafeTransferNFT")
+  const Contract = await ethers.getContractFactory("SafeTransfer")
 
   // Start deployment, returning a promise that resolves to a contract object
   const contract = await Contract.deploy() // Instance of the contract
