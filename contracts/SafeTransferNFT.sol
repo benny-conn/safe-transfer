@@ -15,12 +15,6 @@ contract SafeTransferNFT is ISafeTransferNFT {
         bytes32 secret;
     }
 
-    event LogEvent(
-        address indexed to,
-        bytes32 indexed secret,
-        bytes indexed data
-    );
-
     mapping(address => mapping(address => SafeTransferTokenData))
         private _safeTransfers;
 
@@ -93,7 +87,6 @@ contract SafeTransferNFT is ISafeTransferNFT {
         );
         address asAddr = addrBS.toAddress();
         _safeTransfers[from][asAddr] = trans;
-        emit LogEvent(asAddr, secret, data);
         return this.onERC721Received.selector;
     }
 }
