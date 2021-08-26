@@ -34,11 +34,11 @@ contract SafeTransfer is ISafeTransfer, Pausable, ReentrancyGuard {
             "SafeTransfer: No transfer in progress"
         );
         uint256 amount = _safeTransfers[msg.sender][_to];
-        payable(msg.sender).sendValue(amount);
         _safeTransfers[msg.sender][_to] = 0;
         if (_secrets[msg.sender][_to] != 0) {
             _secrets[msg.sender][_to] = bytes32(0);
         }
+        payable(msg.sender).sendValue(amount);
     }
 
     function completeTransfer(address _from, bytes memory _secret)
@@ -54,9 +54,9 @@ contract SafeTransfer is ISafeTransfer, Pausable, ReentrancyGuard {
         bytes32 secret = _secrets[_from][msg.sender];
         require(secret == keccak256(_secret), "SafeTransfer: Incorrect secret");
         uint256 amount = _safeTransfers[_from][msg.sender];
-        payable(msg.sender).sendValue(amount);
         _safeTransfers[_from][msg.sender] = 0;
         _secrets[_from][msg.sender] = bytes32(0);
+        payable(msg.sender).sendValue(amount);
         emit SafeTransferComplete(_from, msg.sender, amount);
     }
 

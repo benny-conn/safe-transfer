@@ -25,15 +25,15 @@ contract SafeTransferNFT is ISafeTransferNFT, Pausable {
             data.contractAddress != address(0),
             "SafeTransferNFT: No transfer in progress"
         );
-        IERC721(data.contractAddress).safeTransferFrom(
-            address(this),
-            msg.sender,
-            data.tokenID
-        );
         _safeTransfers[_to][msg.sender] = SafeTransferTokenData(
             address(0),
             0,
             0
+        );
+        IERC721(data.contractAddress).safeTransferFrom(
+            address(this),
+            msg.sender,
+            data.tokenID
         );
     }
 
@@ -51,15 +51,16 @@ contract SafeTransferNFT is ISafeTransferNFT, Pausable {
             data.secret == keccak256(secret),
             "SafeTransferNFT: Invalid secret"
         );
-        IERC721(data.contractAddress).safeTransferFrom(
-            address(this),
-            msg.sender,
-            data.tokenID
-        );
+
         _safeTransfers[_from][msg.sender] = SafeTransferTokenData(
             address(0),
             0,
             0
+        );
+        IERC721(data.contractAddress).safeTransferFrom(
+            address(this),
+            msg.sender,
+            data.tokenID
         );
         emit SafeTransferNFTComplete(
             _from,
