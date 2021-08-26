@@ -3,11 +3,18 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./ISafeTransferNFT.sol";
 import "./Bytes.sol";
-import "./Pausable.sol";
 
-contract SafeTransferNFT is ISafeTransferNFT, Pausable {
+contract SafeTransferNFT is
+    ISafeTransferNFT,
+    Pausable,
+    Ownable,
+    ReentrancyGuard
+{
     using Bytes for bytes;
 
     struct SafeTransferTokenData {
@@ -19,7 +26,7 @@ contract SafeTransferNFT is ISafeTransferNFT, Pausable {
     mapping(address => mapping(address => SafeTransferTokenData))
         private _safeTransfers;
 
-    function pullTransfer(address _to) external override {
+    function pullTransfer(address _to) external override nonReentrant {
         SafeTransferTokenData memory data = _safeTransfers[_to][msg.sender];
         require(
             data.contractAddress != address(0),
@@ -40,7 +47,8 @@ contract SafeTransferNFT is ISafeTransferNFT, Pausable {
     function completeTransfer(address _from, bytes memory secret)
         external
         override
-        onlyUnpaused
+        whenNotPaused
+        nonReentrant
     {
         SafeTransferTokenData memory data = _safeTransfers[_from][msg.sender];
         require(
@@ -75,7 +83,7 @@ contract SafeTransferNFT is ISafeTransferNFT, Pausable {
         address from,
         uint256 tokenId,
         bytes calldata data
-    ) external override onlyUnpaused returns (bytes4) {
+    ) external override whenNotPaused returns (bytes4) {
         require(
             data.length >= 20,
             "SafeTransferNFT: data must contain address and secret value"
@@ -95,5 +103,13 @@ contract SafeTransferNFT is ISafeTransferNFT, Pausable {
         address asAddr = addrBS.toAddress();
         _safeTransfers[from][asAddr] = trans;
         return this.onERC721Received.selector;
+    }
+
+    function pause() external onlyOwner whenNotPaused {
+        _pause();
+    }
+
+    function unpause() external onlyOwner whenPaused {
+        _unpause();
     }
 }

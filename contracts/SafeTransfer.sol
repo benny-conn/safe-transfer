@@ -4,10 +4,11 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./ISafeTransfer.sol";
-import "./Pausable.sol";
 
-contract SafeTransfer is ISafeTransfer, Pausable, ReentrancyGuard {
+contract SafeTransfer is ISafeTransfer, Pausable, Ownable, ReentrancyGuard {
     using Address for address payable;
 
     mapping(address => mapping(address => uint256)) private _safeTransfers;
@@ -17,7 +18,7 @@ contract SafeTransfer is ISafeTransfer, Pausable, ReentrancyGuard {
         external
         payable
         override
-        onlyUnpaused
+        whenNotPaused
         nonReentrant
     {
         require(
@@ -44,7 +45,7 @@ contract SafeTransfer is ISafeTransfer, Pausable, ReentrancyGuard {
     function completeTransfer(address _from, bytes memory _secret)
         external
         override
-        onlyUnpaused
+        whenNotPaused
         nonReentrant
     {
         require(
@@ -67,5 +68,13 @@ contract SafeTransfer is ISafeTransfer, Pausable, ReentrancyGuard {
         returns (uint256)
     {
         return _safeTransfers[_from][msg.sender];
+    }
+
+    function pause() external onlyOwner whenNotPaused {
+        _pause();
+    }
+
+    function unpause() external onlyOwner whenPaused {
+        _unpause();
     }
 }
