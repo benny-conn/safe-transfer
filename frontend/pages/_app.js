@@ -15,7 +15,17 @@ function App({ Component, pageProps }) {
           <Layout>
             <Component {...pageProps} />
           </Layout>
-          <ToastContainer />
+          <ToastContainer
+            position="bottom-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
         </ChakraProvider>
       </StateProvider>
     </DAppProvider>

@@ -15,7 +15,7 @@ export default function ConnectButton() {
     <Box
       display="flex"
       alignItems="center"
-      bgGradient="linear(to-r, pink.400,purple.400)"
+      background="gray.400"
       borderRadius="xl"
       py="0">
       <Box px="3">
@@ -24,8 +24,7 @@ export default function ConnectButton() {
         </Text>
       </Box>
       <Button
-        bgGradient="inherit"
-        bg="pink.400"
+        bgGradient="linear(to-r, pink.400,purple.400)"
         borderRadius="xl"
         m="1px"
         px={3}

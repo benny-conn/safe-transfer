@@ -1,3 +1,4 @@
+import React, { useState } from "react"
 import { ethers } from "ethers"
 import safeTransferCompiled from "./abi/SafeTransfer.json"
 import { createContainer } from "unstated-next"
@@ -13,6 +14,8 @@ function useSafeTransfer() {
   // Collect provider from eth state
 
   const { account, library } = useEthers()
+
+  const [txHash, setTxHash] = useState("")
 
   async function getSafeTransferNFTContract() {
     if (library) {
@@ -64,6 +67,8 @@ function useSafeTransfer() {
           gasPrice: price,
           gasLimit: gas,
         })
+
+        setTxHash(tx.hash)
         await tx.wait(1)
         toast.success("Initiated Transfer of ETH.")
       } catch (e) {
@@ -79,23 +84,15 @@ function useSafeTransfer() {
     const ETHContract = await getSafeTransferContract()
 
     if (ETHContract) {
-      const gas = await ETHContract.estimateGas.initiateTransfer(
-        to,
-        hashedSecret,
-        {
-          value: wei,
-        }
-      )
+      const secretBS = ethers.utils.toUtf8Bytes(secret)
+      const gas = await ETHContract.estimateGas.completeTransfer(from, secretBS)
       const price = await library.getGasPrice()
       try {
-        const tx = await ETHContract.completeTransfer(
-          from,
-          ethers.utils.toUtf8Bytes(secret),
-          {
-            gasPrice: price,
-            gasLimit: gas,
-          }
-        )
+        const tx = await ETHContract.completeTransfer(from, secretBS, {
+          gasPrice: price,
+          gasLimit: gas,
+        })
+        setTxHash(tx.hash)
         await tx.wait(1)
         toast.success("Completed ETH transfer!")
       } catch (e) {
@@ -110,19 +107,14 @@ function useSafeTransfer() {
     const ETHContract = await getSafeTransferContract()
 
     if (ETHContract) {
-      const gas = await ETHContract.estimateGas.initiateTransfer(
-        to,
-        hashedSecret,
-        {
-          value: wei,
-        }
-      )
+      const gas = await ETHContract.estimateGas.pullTransfer(to)
       const price = await library.getGasPrice()
       try {
         const tx = await ETHContract.pullTransfer(to, {
           gasPrice: price,
           gasLimit: gas,
         })
+        setTxHash(tx.hash)
         await tx.wait(1)
         toast.success("Successfully pulled transfer!")
       } catch (e) {
@@ -143,12 +135,11 @@ function useSafeTransfer() {
 
       const addrWithSecret = ethers.utils.concat([addr, hashedSecret])
 
-      const gas = await ETHContract.estimateGas.initiateTransfer(
-        to,
-        hashedSecret,
-        {
-          value: wei,
-        }
+      const gas = await NFTContract.estimateGas.safeTransferFrom(
+        account,
+        process.env.NEXT_PUBLIC_NFT_ADDRESS,
+        id,
+        addrWithSecret
       )
       const price = await library.getGasPrice()
 
@@ -163,6 +154,7 @@ function useSafeTransfer() {
             gasLimit: gas,
           }
         )
+        setTxHash(tx.hash)
         await tx.wait(1)
         toast.success("Successfully initiated NFT transfer!")
       } catch (e) {
@@ -176,19 +168,14 @@ function useSafeTransfer() {
     const NFTContract = await getSafeTransferNFTContract()
 
     if (NFTContract) {
-      const gas = await ETHContract.estimateGas.initiateTransfer(
-        to,
-        hashedSecret,
-        {
-          value: wei,
-        }
-      )
+      const gas = await ETHContract.estimateGas.pullTransfer(to)
       const price = await library.getGasPrice()
       try {
         const tx = await NFTContract.pullTransfer(to, {
           gasPrice: price,
           gasLimit: gas,
         })
+        setTxHash(tx.hash)
         await tx.wait(1)
         toast.success("Successfully pulled transfer!")
       } catch (e) {
@@ -203,19 +190,15 @@ function useSafeTransfer() {
     const NFTContract = await getSafeTransferNFTContract()
 
     if (NFTContract) {
-      const gas = await ETHContract.estimateGas.initiateTransfer(
-        to,
-        hashedSecret,
-        {
-          value: wei,
-        }
-      )
+      const secretBS = ethers.utils.toUtf8Bytes(secret)
+      const gas = await ETHContract.estimateGas.completeTransfer(from, secretBS)
       const price = await library.getGasPrice()
       try {
-        const tx = await NFTContract.completeTransfer(from, secret, {
+        const tx = await NFTContract.completeTransfer(from, secretBS, {
           gasPrice: price,
           gasLimit: gas,
         })
+        setTxHash(tx.hash)
         await tx.wait(1)
         toast.success("Completed NFT transfer!")
       } catch (e) {
@@ -226,6 +209,7 @@ function useSafeTransfer() {
   }
 
   return {
+    txHash,
     transferETH,
     completeTransferETH,
     pullTransferETH,
