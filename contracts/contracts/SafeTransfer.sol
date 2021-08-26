@@ -4,8 +4,9 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Address.sol";
 import "./ISafeTransfer.sol";
+import "./Pausable.sol";
 
-contract SafeTransfer is ISafeTransfer {
+contract SafeTransfer is ISafeTransfer, Pausable {
     using Address for address payable;
 
     mapping(address => mapping(address => uint256)) private _safeTransfers;
@@ -15,6 +16,7 @@ contract SafeTransfer is ISafeTransfer {
         external
         payable
         override
+        onlyUnpaused
     {
         require(
             _safeTransfers[msg.sender][_to] == 0,
@@ -40,6 +42,7 @@ contract SafeTransfer is ISafeTransfer {
     function completeTransfer(address _from, bytes memory _secret)
         external
         override
+        onlyUnpaused
     {
         require(
             _safeTransfers[_from][msg.sender] != 0,

@@ -5,8 +5,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "./ISafeTransferNFT.sol";
 import "./Bytes.sol";
+import "./Pausable.sol";
 
-contract SafeTransferNFT is ISafeTransferNFT {
+contract SafeTransferNFT is ISafeTransferNFT, Pausable {
     using Bytes for bytes;
 
     struct SafeTransferTokenData {
@@ -39,6 +40,7 @@ contract SafeTransferNFT is ISafeTransferNFT {
     function completeTransfer(address _from, bytes memory secret)
         external
         override
+        onlyUnpaused
     {
         SafeTransferTokenData memory data = _safeTransfers[_from][msg.sender];
         require(
@@ -72,7 +74,7 @@ contract SafeTransferNFT is ISafeTransferNFT {
         address from,
         uint256 tokenId,
         bytes calldata data
-    ) external override returns (bytes4) {
+    ) external override onlyUnpaused returns (bytes4) {
         require(
             data.length >= 20,
             "SafeTransferNFT: data must contain address and secret value"
