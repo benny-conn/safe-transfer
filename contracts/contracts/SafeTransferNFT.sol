@@ -3,12 +3,11 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./ISafeTransferNFT.sol";
 import "./Bytes.sol";
 import "./Pausable.sol";
 
-contract SafeTransferNFT is ISafeTransferNFT, Pausable, ReentrancyGuard {
+contract SafeTransferNFT is ISafeTransferNFT, Pausable {
     using Bytes for bytes;
 
     struct SafeTransferTokenData {
@@ -20,7 +19,7 @@ contract SafeTransferNFT is ISafeTransferNFT, Pausable, ReentrancyGuard {
     mapping(address => mapping(address => SafeTransferTokenData))
         private _safeTransfers;
 
-    function pullTransfer(address _to) external override nonReentrant {
+    function pullTransfer(address _to) external override {
         SafeTransferTokenData memory data = _safeTransfers[_to][msg.sender];
         require(
             data.contractAddress != address(0),
@@ -42,7 +41,6 @@ contract SafeTransferNFT is ISafeTransferNFT, Pausable, ReentrancyGuard {
         external
         override
         onlyUnpaused
-        nonReentrant
     {
         SafeTransferTokenData memory data = _safeTransfers[_from][msg.sender];
         require(
