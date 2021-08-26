@@ -3,10 +3,11 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./ISafeTransfer.sol";
 import "./Pausable.sol";
 
-contract SafeTransfer is ISafeTransfer, Pausable {
+contract SafeTransfer is ISafeTransfer, Pausable, ReentrancyGuard {
     using Address for address payable;
 
     mapping(address => mapping(address => uint256)) private _safeTransfers;
@@ -17,6 +18,7 @@ contract SafeTransfer is ISafeTransfer, Pausable {
         payable
         override
         onlyUnpaused
+        nonReentrant
     {
         require(
             _safeTransfers[msg.sender][_to] == 0,
@@ -26,7 +28,7 @@ contract SafeTransfer is ISafeTransfer, Pausable {
         _secrets[msg.sender][_to] = _secret;
     }
 
-    function pullTransfer(address _to) external override {
+    function pullTransfer(address _to) external override nonReentrant {
         require(
             _safeTransfers[msg.sender][_to] > 0,
             "SafeTransfer: No transfer in progress"
@@ -43,6 +45,7 @@ contract SafeTransfer is ISafeTransfer, Pausable {
         external
         override
         onlyUnpaused
+        nonReentrant
     {
         require(
             _safeTransfers[_from][msg.sender] != 0,
